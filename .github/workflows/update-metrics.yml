@@ -1,0 +1,26 @@
+name: update stock metrics
+
+# ⏰ Runs every hour (change the cron line if you want daily, etc.)
+on:
+  schedule:
+    - cron: '0 * * * *'   # ⬅︎ UTC; “0” = minute 0 of every hour
+  workflow_dispatch:       # lets you run it manually from the Actions tab
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install -r requirements.txt
+      - run: python fetch_metrics.py
+
+      # 🚀 Commit the newly created metrics.json back to the repo
+      - uses: EndBug/add-and-commit@v9
+        with:
+          author_name: github-actions
+          message: 'Update metrics.json'
