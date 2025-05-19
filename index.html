@@ -1,11 +1,24 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>My First GitHub Page</title>
-  </head>
-  <body>
-    <h1>Hello, world!</h1>
-    <p>If you can read this, everything worked 🎉</p>
-  </body>
-</html>
+<table id="stocks"></table>
+
+<script type="module">
+  async function load() {
+    const res = await fetch('metrics.json');    // same folder, easy!
+    const data = await res.json();
+
+    const tbl = document.getElementById('stocks');
+    tbl.innerHTML = '<tr><th>Ticker</th><th>Price</th><th>High</th><th>Low</th><th>P/E</th></tr>';
+
+    for (const [ticker, d] of Object.entries(data)) {
+      tbl.insertAdjacentHTML('beforeend', `
+        <tr>
+          <td>${ticker}</td>
+          <td>${d.price}</td>
+          <td>${d.dayHigh}</td>
+          <td>${d.dayLow}</td>
+          <td>${d.peRatio ?? '—'}</td>
+        </tr>
+      `);
+    }
+  }
+  load();
+</script>
