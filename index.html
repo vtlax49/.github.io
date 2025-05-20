@@ -1,24 +1,30 @@
-<table id="stocks"></table>
+<h2>ES futures – 30 min candles (last 60 days)</h2>
+<table id="es"></table>
 
 <script type="module">
-  async function load() {
-    const res = await fetch('metrics.json');    // same folder, easy!
-    const data = await res.json();
+async function loadES() {
+  const res  = await fetch('es_30m.json');
+  const data = await res.json();
 
-    const tbl = document.getElementById('stocks');
-    tbl.innerHTML = '<tr><th>Ticker</th><th>Price</th><th>High</th><th>Low</th><th>P/E</th></tr>';
+  // Build header
+  const tbl = document.getElementById('es');
+  tbl.innerHTML =
+    '<tr><th>Date & Time</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Vol</th></tr>';
 
-    for (const [ticker, d] of Object.entries(data)) {
-      tbl.insertAdjacentHTML('beforeend', `
-        <tr>
-          <td>${ticker}</td>
-          <td>${d.price}</td>
-          <td>${d.dayHigh}</td>
-          <td>${d.dayLow}</td>
-          <td>${d.peRatio ?? '—'}</td>
-        </tr>
-      `);
-    }
-  }
-  load();
+  // Show ALL rows – or slice(-n) for fewer
+  data.forEach(d => {
+    tbl.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td>${d.datetime.replace('T',' ').slice(0,16)}</td>
+        <td>${d.open }</td>
+        <td>${d.high }</td>
+        <td>${d.low  }</td>
+        <td>${d.close}</td>
+        <td>${d.volume.toLocaleString()}</td>
+      </tr>
+    `);
+  });
+}
+
+loadES();
 </script>
