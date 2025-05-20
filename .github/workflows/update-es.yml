@@ -1,0 +1,26 @@
+name: update 30-min ES data
+
+on:
+  schedule:
+    # minute hour dom month dow  (UTC)  — */30 = every half hour
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install yfinance
+
+      - run: python fetch_es_30m.py
+
+      - uses: EndBug/add-and-commit@v9
+        with:
+          author_name: github-actions
+          message: 'Update es_30m.json'
