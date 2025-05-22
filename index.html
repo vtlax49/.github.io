@@ -2,128 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>ES Futures Dashboard</title>
+  <title>ES RTH Gap-Fill Dashboard</title>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; }
-    table { border-collapse: collapse; width: 100%; margin-bottom: 2rem; }
-    th, td { border: 1px solid #ccc; padding: 4px 6px; }
-    th { background: #f4f4f4; text-align: left; }
-    .error { color: red; }
-    .right { text-align: right; }
-    .gap-panel h2 { margin-top: 0; }
-    .gap-panel { border: 1px solid #ccc; padding: 1rem; margin-bottom: 2rem; }
-    .gap-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: 6px; }
-    .gap-grid div { background:#f9f9f9; padding:4px; border-radius:4px; }
-    .gap-grid .hdr { font-weight:600; background:#eaeaea; }
+    body   { font-family: system-ui, sans-serif; margin: 2rem; max-width: 800px; }
+    h1,h2  { margin: .2rem 0 .6rem 0; }
+    table  { border-collapse: collapse; width: 100%; margin: 1.2rem 0; }
+    th,td  { border: 1px solid #ccc; padding: 6px 8px; text-align: center; }
+    th     { background:#f3f3f3; }
+    caption{ margin-bottom:.4rem; font-weight:600; text-align:left; }
+    .error { color:red; }
   </style>
 </head>
 <body>
+<h1>RTH Gap-Fill Statistics (ES Futures)</h1>
+<p id="status">Loading data…</p>
 
-<!-- ───────── 30-min candle table ─────────────────────────────────────────── -->
-<h1>ES futures – 30-minute candles (last 60 days)</h1>
-<p id="es-status">Loading…</p>
-<table id="es" hidden></table>
+<!-- ── SUMMARY TABLE: overall vs last-30 trading days ────────────────────── -->
+<table id="tbl-summary" hidden>
+  <caption>Overall vs Last 30 Trading Days</caption>
+  <thead>
+    <tr><th rowspan="2"></th><th colspan="2">Half-Gap Fill</th><th colspan="2">Full-Gap Fill</th></tr>
+    <tr><th>Count</th><th>%</th><th>Count</th><th>%</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
-<!-- ───────── Gap-fill SUMMARY panel ──────────────────────────────────────── -->
-<div class="gap-panel">
-  <h2>RTH Gap & Fill Stats</h2>
-  <p id="gap-sum-status">Calculating…</p>
-  <div id="gap-sum" class="gap-grid" hidden></div>
-</div>
-
-<!-- ───────── Gap-fill DETAIL table ───────────────────────────────────────── -->
-<table id="gap" hidden></table>
+<!-- ── WEEKDAY TABLE: overall + 30-day side-by-side ──────────────────────── -->
+<table id="tbl-weekday" hidden>
+  <caption>By Weekday (overall & last 30 trading days)</caption>
+  <thead>
+    <tr><th rowspan="2">Week-day</th><th colspan="2">Half-Gap Fill</th><th colspan="2">Full-Gap Fill</th></tr>
+    <tr><th>All</th><th>30d</th><th>All</th><th>30d</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
 <script type="module">
-/* ---------- helper utilities -------------------------------------------- */
 const pct = (num, den) => den ? (100 * num / den).toFixed(1) + '%' : '—';
+const weekdayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
-function weekdayStr(d) {
-  return ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][new Date(d).getDay()];
-}
-
-/* ---------- generic table loader (unchanged) ----------------------------- */
-async function renderTable(url, tableId, statusId, makeRow, afterLoad=undefined) {
+async function loadGapData() {
   try {
-    const res = await fetch(url);
+    const res = await fetch('./es_gapfills.json');
     if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
     const data = await res.json();
-
-    const tbl = document.getElementById(tableId);
-    if (tbl) {
-      tbl.hidden = false;
-      tbl.innerHTML += data.map(makeRow).join('');
-    }
-
-    const stat = document.getElementById(statusId);
-    if (stat) stat.hidden = true;
-
-    if (afterLoad) afterLoad(data);
+    buildSummaryTables(data);
+    document.getElementById('status').hidden = true;
   } catch (err) {
-    const el = document.getElementById(statusId);
-    el.textContent = '⚠️ ' + err.message + ' — is the JSON file present?';
-    el.className = 'error';
+    const st = document.getElementById('status');
+    st.textContent = '⚠️ ' + err.message + ' — is es_gapfills.json present?';
+    st.className = 'error';
     console.error(err);
   }
 }
 
-/* ---------- 30-minute candle table -------------------------------------- */
-document.getElementById('es').innerHTML =
-  '<tr><th>Date&nbsp;Time</th><th>Open</th><th>High</th>' +
-  '<th>Low</th><th>Close</th><th>Vol</th></tr>';
-
-renderTable('./es_30m.json', 'es', 'es-status', d => `
-  <tr>
-    <td>${d.datetime.replace('T',' ').slice(0,16)}</td>
-    <td>${d.open}</td><td>${d.high}</td><td>${d.low}</td>
-    <td>${d.close}</td><td class="right">${d.volume.toLocaleString()}</td>
-  </tr>
-`);
-
-/* ---------- Gap-fill detail table --------------------------------------- */
-document.getElementById('gap').innerHTML =
-  '<tr><th>Date</th><th>Prev&nbsp;Close</th><th>09:30&nbsp;Open</th>' +
-  '<th>Gap</th><th>½&nbsp;filled?</th><th>Full&nbsp;filled?</th></tr>';
-
-/* ---------- Gap-fill SUMMARY logic -------------------------------------- */
-function buildGapSummary(data) {
-  const sumDiv = document.getElementById('gap-sum');
-  const last30  = data.slice(-30);
-
-  const metrics = [
-    { label:'Overall',      set:data },
-    { label:'Last&nbsp;30&nbsp;days', set:last30 }
+function buildSummaryTables(rows) {
+  const last30 = rows.slice(-30);
+  // --- Overall vs 30-day table -------------------------------------------
+  const sums = [
+    { label:'Overall',  set: rows },
+    { label:'Last 30',  set: last30 }
   ];
 
-  // weekday buckets (Mon-Fri)
-  ['Mon','Tue','Wed','Thu','Fri'].forEach(wd => {
-    metrics.push({ label:`${wd} (all)`, set:data.filter(d=>weekdayStr(d.date)===wd) });
-    metrics.push({ label:`${wd} (30d)`, set:last30.filter(d=>weekdayStr(d.date)===wd) });
-  });
-
-  const boxes = metrics.map(({label,set})=>{
+  const bodySum = document.querySelector('#tbl-summary tbody');
+  sums.forEach(({label,set})=>{
     const total = set.length;
-    const half  = set.filter(x=>x.half_gap_filled).length;
-    const full  = set.filter(x=>x.full_gap_filled).length;
-    return `
-      <div class="hdr">${label}</div>
-      <div>½&nbsp;fill: ${pct(half,total)}</div>
-      <div>Full&nbsp;fill: ${pct(full,total)}</div>
-    `;
-  }).join('');
+    const half  = set.filter(r=>r.half_gap_filled).length;
+    const full  = set.filter(r=>r.full_gap_filled).length;
+    bodySum.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td style="text-align:left">${label}</td>
+        <td>${half}</td><td>${pct(half,total)}</td>
+        <td>${full}</td><td>${pct(full,total)}</td>
+      </tr>
+    `);
+  });
+  document.getElementById('tbl-summary').hidden = false;
 
-  sumDiv.innerHTML = boxes;
-  sumDiv.hidden = false;
+  // --- Weekday table ------------------------------------------------------
+  const bodyWd = document.querySelector('#tbl-weekday tbody');
+  ['Mon','Tue','Wed','Thu','Fri'].forEach((wd,i)=>{
+    const allSet  = rows   .filter(r=>new Date(r.date).getDay()===i+1); // +1 because 0=Sun
+    const d30Set  = last30 .filter(r=>new Date(r.date).getDay()===i+1);
+
+    const totalA  = allSet.length,   halfA = allSet.filter(r=>r.half_gap_filled).length,
+          fullA   = allSet.filter(r=>r.full_gap_filled).length;
+    const totalB  = d30Set.length,   halfB = d30Set.filter(r=>r.half_gap_filled).length,
+          fullB   = d30Set.filter(r=>r.full_gap_filled).length;
+
+    bodyWd.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td style="text-align:left">${wd}</td>
+        <td>${pct(halfA,totalA)}</td><td>${pct(halfB,totalB)}</td>
+        <td>${pct(fullA,totalA)}</td><td>${pct(fullB,totalB)}</td>
+      </tr>
+    `);
+  });
+  document.getElementById('tbl-weekday').hidden = false;
 }
 
-renderTable('./es_gapfills.json','gap','gap-sum-status', d => `
-  <tr>
-    <td>${d.date}</td><td>${d.prev_close}</td><td>${d.open_0930}</td>
-    <td>${d.gap}</td>
-    <td>${d.half_gap_filled ? '✅' : '❌'}</td>
-    <td>${d.full_gap_filled ? '✅' : '❌'}</td>
-  </tr>
-`, buildGapSummary);
+loadGapData();
 </script>
 
 <noscript><p class="error">This page needs JavaScript to display data.</p></noscript>
