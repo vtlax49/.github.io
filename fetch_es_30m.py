@@ -1,149 +1,118 @@
-# fetch_es_30m.py
-#
-# 1. Download 60 days of 30-minute ES futures from Yahoo Finance.
-# 2. Save all candles to es_30m.json
-# 3. Compute RTH gap / half-gap / full-gap fills
-#    (prev-day 16:00 close vs current-day 09:30 open, Eastern time)
-#    and save to es_gapfills.json
-#
-# Drop this file in your repo root, commit, re-run your Action.
+#!/usr/bin/env python3
+"""
+Minimal RTH gap-fill extractor (uses logic from V15 script, trimmed).
+
+Outputs: es_gapfills.json  →  [
+  { "date": "2025-05-22",
+    "prev_close": 5859.25,
+    "open_0930":  5855.50,
+    "gap": -3.75,
+    "half_gap_filled": true,
+    "full_gap_filled": true }
+  , …
+]
+"""
 
 import json, pathlib, sys, datetime as dt
+import numpy as np
 import pandas as pd
 import yfinance as yf
 
-TICKER   = "ES=F"
-PERIOD   = "60d"
-INTERVAL = "30m"
-HERE     = pathlib.Path(__file__).parent
-NY_TZ    = "America/New_York"
+# --------------------------------------------------------------------------
+TICKER    = "ES=F"
+TICK_TOL  = 0.50            # dollars
+NY_TZ     = "America/New_York"
+LOOKBACK  = "90d"           # gives ~60 trading days even with holidays
+OUTFILE   = pathlib.Path(__file__).with_name("es_gapfills.json")
+# --------------------------------------------------------------------------
 
+def flatten_and_rename(df):
+    """Convert yfinance multi-index columns to Open/High/Low/Close/Volume."""
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = ["_".join(c) for c in df.columns]
 
-def fetch_history() -> pd.DataFrame:
-    df = yf.Ticker(TICKER).history(
-        period=PERIOD,
-        interval=INTERVAL,
-        actions=False,
-    )
+    rename = {}
+    for c in df.columns:
+        cl = c.lower()
+        if "open" in cl and "adj" not in cl:   rename[c] = "Open"
+        elif "high" in cl:                     rename[c] = "High"
+        elif "low"  in cl:                     rename[c] = "Low"
+        elif "close" in cl and "adj" not in cl:rename[c] = "Close"
+        elif "volume" in cl:                   rename[c] = "Volume"
+    df = df.rename(columns=rename)
+    return df[["Open","High","Low","Close","Volume"]]
 
+def fetch_15m(symbol:str)->pd.DataFrame:
+    df = yf.download(symbol, period=LOOKBACK, interval="15m", auto_adjust=False, progress=False)
     if df.empty:
-        raise RuntimeError("No data returned from yfinance")
-
-    # -------------  Time-zone handling  -----------------------------------
-    #
-    # Yahoo usually returns America/New_York already, but occasionally UTC.
-    # Standardise to US/Eastern and keep the tz info until FINAL export.
-    #
+        raise RuntimeError("No data from Yahoo")
+    df = flatten_and_rename(df)
+    # normalise tz → Eastern
     if df.index.tz is None:
-        # Assume UTC if no timezone
-        df.index = df.index.tz_localize("UTC").tz_convert(NY_TZ)
-    else:
-        df.index = df.index.tz_convert(NY_TZ)
-
+        df.index = df.index.tz_localize("UTC")
+    df.index = df.index.tz_convert(NY_TZ)
     return df
 
+def make_rth_subset(df):
+    """Keep weekday 09:30-16:00 Eastern bars only."""
+    df2 = df.copy()
+    df2.index = df2.index.tz_localize(None)          # easier slicing
+    df2 = df2[df2.index.dayofweek < 5]               # Mon-Fri
+    return df2.between_time("09:30","16:00")
 
-# --------------------------------------------------------------------------
-#  JSON helpers
-# --------------------------------------------------------------------------
-def write_json(path: pathlib.Path, obj):
-    path.write_text(json.dumps(obj, indent=2))
+# ---------------- GAP-FILL LOGIC (unchanged except for vectorisation) -----
+def gap_fill_stats(df_rth: pd.DataFrame) -> list[dict]:
+    if df_rth.empty:
+        return []
 
+    df = df_rth.copy()
+    df["Date"] = df.index.date
 
-def export_intraday(df: pd.DataFrame):
-    tidy = (
-        df.reset_index()
-          .rename(columns={df.index.name: "datetime"})
-    )
-    tidy["datetime"] = tidy["datetime"].dt.strftime("%Y-%m-%dT%H:%M:%S%z")
-    tidy = tidy.round({"Open": 2, "High": 2, "Low": 2, "Close": 2})
-    tidy["Volume"] = tidy["Volume"].fillna(0).astype(int)
-    tidy = tidy[["datetime", "Open", "High", "Low", "Close", "Volume"]].rename(
-        columns={"Open": "open", "High": "high",
-                 "Low": "low", "Close": "close", "Volume": "volume"}
-    )
-    write_json(HERE / "es_30m.json", tidy.to_dict(orient="records"))
+    # Daily OHLC summary
+    daily = df.groupby(df.index.date).agg({
+        "Open":"first","High":"max","Low":"min","Close":"last"
+    })
+    daily.index = pd.to_datetime(daily.index)
 
+    # Gap calculations
+    daily["Prev_Close"]    = daily["Close"].shift(1)
+    daily["Gap"]           = daily["Open"] - daily["Prev_Close"]
+    daily["HalfGapPrice"]  = daily["Prev_Close"] + daily["Gap"]/2.0
 
-# --------------------------------------------------------------------------
-#  Gap / fill logic
-# --------------------------------------------------------------------------
-def gap_stats(df: pd.DataFrame) -> list[dict]:
-    """
-    Returns list of dicts keyed by trading date with:
-      prev_close, open_0930, gap, half_gap_filled, full_gap_filled
-    """
-    df = df.copy()
-    df["date"] = df.index.date
-    df["time"] = df.index.time
+    def gap_filled(row, target):
+        if pd.isna(target): return False
+        low_tol  = row["Low"]  - TICK_TOL
+        high_tol = row["High"] + TICK_TOL
+        return low_tol <= target <= high_tol
 
-    # Closing price candidates: bar that *starts* at 16:00 (preferred),
-    # else the bar that starts at 15:30 (ends at 16:00).
-    close_mask = df["time"].isin([dt.time(16, 0), dt.time(15, 30)])
-    closes = (
-        df.loc[close_mask, ["date", "Close", "time"]]
-          .sort_values("time")               # 16:00 appears after 15:30 if both exist
-          .drop_duplicates("date", keep="last")
-          .set_index("date")["Close"]
-    )
+    daily["HalfGapFill"] = daily.apply(lambda r: gap_filled(r, r["HalfGapPrice"]), axis=1)
+    daily["FullGapFill"] = daily.apply(lambda r: gap_filled(r, r["Prev_Close"]),    axis=1)
 
-    # 09:30 opens
-    open_mask = df["time"] == dt.time(9, 30)
-    opens = df.loc[open_mask]
-
-    results = []
-    for ts, row in opens.iterrows():
-        cur_date = ts.date()
-        prev_date = cur_date - dt.timedelta(days=1)
-
-        # Walk back to previous date that has a stored close (skip weekends/holidays)
-        while prev_date not in closes.index and prev_date >= min(closes.index):
-            prev_date -= dt.timedelta(days=1)
-        if prev_date not in closes.index:
-            continue
-
-        prev_close = float(closes.loc[prev_date])
-        open_0930  = float(row["Open"])
-        gap        = round(open_0930 - prev_close, 2)
-
-        day_slice = df[df["date"] == cur_date]
-        day_low   = day_slice["Low"].min()
-        day_high  = day_slice["High"].max()
-        half_gap_price = prev_close + gap / 2
-
-        if gap > 0:   # up-gap
-            half_filled = day_low  <= half_gap_price
-            full_filled = day_low  <= prev_close
-        elif gap < 0: # down-gap
-            half_filled = day_high >= half_gap_price
-            full_filled = day_high >= prev_close
-        else:
-            half_filled = full_filled = True  # zero gap trivially filled
-
-        results.append({
-            "date"            : cur_date.isoformat(),
-            "prev_close"      : round(prev_close, 2),
-            "open_0930"       : round(open_0930, 2),
-            "gap"             : gap,
-            "half_gap_filled" : bool(half_filled),
-            "full_gap_filled" : bool(full_filled),
+    out = []
+    for d, r in daily.iterrows():
+        out.append({
+            "date":            d.date().isoformat(),
+            "prev_close":      round(float(r["Prev_Close"]),2) if pd.notna(r["Prev_Close"]) else np.nan,
+            "open_0930":       round(float(r["Open"]),2),
+            "gap":             round(float(r["Gap"]),2) if pd.notna(r["Prev_Close"]) else 0.0,
+            "half_gap_filled": bool(r["HalfGapFill"]),
+            "full_gap_filled": bool(r["FullGapFill"])
         })
-
-    return results
-
+    # drop the very first day (no Prev_Close)
+    return [x for x in out if pd.notna(x["prev_close"])]
 
 # --------------------------------------------------------------------------
-def main() -> int:
+def main()->int:
     try:
-        hist = fetch_history()
-        export_intraday(hist)
-        write_json(HERE / "es_gapfills.json", gap_stats(hist))
-        print("✅ Wrote es_30m.json and es_gapfills.json")
+        raw = fetch_15m(TICKER)
+        rth = make_rth_subset(raw)
+        stats = gap_fill_stats(rth)
+        OUTFILE.write_text(json.dumps(stats, indent=2))
+        print(f"✅ wrote {OUTFILE} ({len(stats)} rows)")
         return 0
-    except Exception as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+    except Exception as e:
+        print("ERROR:", e, file=sys.stderr)
         return 1
-
 
 if __name__ == "__main__":
     sys.exit(main())
