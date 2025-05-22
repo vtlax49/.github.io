@@ -1,0 +1,386 @@
+[
+  {
+    "date": "2025-03-13",
+    "prev_close": 5603.0,
+    "open_0930": 5597.75,
+    "gap": -5.25,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-03-14",
+    "prev_close": 5528.25,
+    "open_0930": 5572.0,
+    "gap": 43.75,
+    "half_gap_filled": false,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-03-17",
+    "prev_close": 5637.5,
+    "open_0930": 5637.25,
+    "gap": -0.25,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-03-18",
+    "prev_close": 5680.5,
+    "open_0930": 5657.25,
+    "gap": -23.25,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-03-19",
+    "prev_close": 5620.25,
+    "open_0930": 5637.0,
+    "gap": 16.75,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-03-20",
+    "prev_close": 5679.5,
+    "open_0930": 5641.25,
+    "gap": -38.25,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-03-24",
+    "prev_close": 5664.25,
+    "open_0930": 5782.5,
+    "gap": 118.25,
+    "half_gap_filled": false,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-03-25",
+    "prev_close": 5813.5,
+    "open_0930": 5826.0,
+    "gap": 12.5,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-03-26",
+    "prev_close": 5826.25,
+    "open_0930": 5824.0,
+    "gap": -2.25,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-03-27",
+    "prev_close": 5758.25,
+    "open_0930": 5742.75,
+    "gap": -15.5,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-03-28",
+    "prev_close": 5740.5,
+    "open_0930": 5723.5,
+    "gap": -17.0,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-03-31",
+    "prev_close": 5624.5,
+    "open_0930": 5563.5,
+    "gap": -61.0,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-04-01",
+    "prev_close": 5656.25,
+    "open_0930": 5638.75,
+    "gap": -17.5,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-04-02",
+    "prev_close": 5674.75,
+    "open_0930": 5613.0,
+    "gap": -61.75,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-04-03",
+    "prev_close": 5710.0,
+    "open_0930": 5512.0,
+    "gap": -198.0,
+    "half_gap_filled": false,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-04-04",
+    "prev_close": 5436.25,
+    "open_0930": 5292.0,
+    "gap": -144.25,
+    "half_gap_filled": true,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-04-07",
+    "prev_close": 5108.5,
+    "open_0930": 4942.5,
+    "gap": -166.0,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-04-08",
+    "prev_close": 5099.0,
+    "open_0930": 5272.0,
+    "gap": 173.0,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-04-09",
+    "prev_close": 5017.5,
+    "open_0930": 4983.0,
+    "gap": -34.5,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-04-10",
+    "prev_close": 5490.5,
+    "open_0930": 5375.5,
+    "gap": -115.0,
+    "half_gap_filled": true,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-04-11",
+    "prev_close": 5299.5,
+    "open_0930": 5281.0,
+    "gap": -18.5,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-04-14",
+    "prev_close": 5390.25,
+    "open_0930": 5493.0,
+    "gap": 102.75,
+    "half_gap_filled": true,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-04-15",
+    "prev_close": 5442.5,
+    "open_0930": 5449.75,
+    "gap": 7.25,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-04-16",
+    "prev_close": 5428.25,
+    "open_0930": 5367.25,
+    "gap": -61.0,
+    "half_gap_filled": true,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-04-17",
+    "prev_close": 5305.5,
+    "open_0930": 5322.5,
+    "gap": 17.0,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-04-21",
+    "prev_close": 5311.25,
+    "open_0930": 5257.0,
+    "gap": -54.25,
+    "half_gap_filled": false,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-04-22",
+    "prev_close": 5183.5,
+    "open_0930": 5245.5,
+    "gap": 62.0,
+    "half_gap_filled": true,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-04-23",
+    "prev_close": 5314.25,
+    "open_0930": 5450.0,
+    "gap": 135.75,
+    "half_gap_filled": false,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-04-24",
+    "prev_close": 5398.5,
+    "open_0930": 5411.75,
+    "gap": 13.25,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-04-25",
+    "prev_close": 5510.5,
+    "open_0930": 5510.5,
+    "gap": 0.0,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-04-28",
+    "prev_close": 5548.75,
+    "open_0930": 5556.75,
+    "gap": 8.0,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-04-29",
+    "prev_close": 5551.75,
+    "open_0930": 5531.0,
+    "gap": -20.75,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-04-30",
+    "prev_close": 5583.5,
+    "open_0930": 5516.5,
+    "gap": -67.0,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-05-01",
+    "prev_close": 5584.0,
+    "open_0930": 5645.0,
+    "gap": 61.0,
+    "half_gap_filled": true,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-05-02",
+    "prev_close": 5625.0,
+    "open_0930": 5686.75,
+    "gap": 61.75,
+    "half_gap_filled": true,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-05-05",
+    "prev_close": 5705.75,
+    "open_0930": 5664.25,
+    "gap": -41.5,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-05-06",
+    "prev_close": 5674.5,
+    "open_0930": 5616.5,
+    "gap": -58.0,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-05-07",
+    "prev_close": 5625.5,
+    "open_0930": 5638.5,
+    "gap": 13.0,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-05-08",
+    "prev_close": 5648.75,
+    "open_0930": 5688.75,
+    "gap": 40.0,
+    "half_gap_filled": true,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-05-09",
+    "prev_close": 5686.5,
+    "open_0930": 5700.0,
+    "gap": 13.5,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-05-12",
+    "prev_close": 5677.75,
+    "open_0930": 5850.25,
+    "gap": 172.5,
+    "half_gap_filled": true,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-05-13",
+    "prev_close": 5864.5,
+    "open_0930": 5869.75,
+    "gap": 5.25,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-05-14",
+    "prev_close": 5909.25,
+    "open_0930": 5913.25,
+    "gap": 4.0,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-05-15",
+    "prev_close": 5909.75,
+    "open_0930": 5889.0,
+    "gap": -20.75,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-05-16",
+    "prev_close": 5938.25,
+    "open_0930": 5944.5,
+    "gap": 6.25,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-05-19",
+    "prev_close": 5975.25,
+    "open_0930": 5912.25,
+    "gap": -63.0,
+    "half_gap_filled": true,
+    "full_gap_filled": true
+  },
+  {
+    "date": "2025-05-20",
+    "prev_close": 5981.0,
+    "open_0930": 5962.25,
+    "gap": -18.75,
+    "half_gap_filled": true,
+    "full_gap_filled": false
+  },
+  {
+    "date": "2025-05-21",
+    "prev_close": 5959.25,
+    "open_0930": 5914.5,
+    "gap": -44.75,
+    "half_gap_filled": true,
+    "full_gap_filled": false
+  }
+]
