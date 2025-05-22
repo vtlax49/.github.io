@@ -374,5 +374,13 @@
     "gap": -44.75,
     "half_gap_filled": true,
     "full_gap_filled": false
+  },
+  {
+    "date": "2025-05-22",
+    "prev_close": 5859.25,
+    "open_0930": 5855.5,
+    "gap": -3.75,
+    "half_gap_filled": true,
+    "full_gap_filled": true
   }
 ]
