@@ -1,385 +1,385 @@
 [
   {
     "date": "2025-03-14",
-    "prev_close": 5541.25,
+    "prev_close": 5543.5,
     "open_0930": 5572.0,
-    "gap": 30.75,
-    "half_gap_filled": true,
+    "gap": 28.5,
+    "half_gap_filled": false,
     "full_gap_filled": false
   },
   {
     "date": "2025-03-17",
-    "prev_close": 5626.25,
+    "prev_close": 5626.5,
     "open_0930": 5637.25,
-    "gap": 11.0,
-    "half_gap_filled": true,
-    "full_gap_filled": true
+    "gap": 10.75,
+    "half_gap_filled": false,
+    "full_gap_filled": false
   },
   {
     "date": "2025-03-18",
-    "prev_close": 5680.25,
+    "prev_close": 5677.25,
     "open_0930": 5657.25,
-    "gap": -23.0,
-    "half_gap_filled": true,
-    "full_gap_filled": true
+    "gap": -20.0,
+    "half_gap_filled": false,
+    "full_gap_filled": false
   },
   {
     "date": "2025-03-19",
-    "prev_close": 5620.25,
+    "prev_close": 5623.25,
     "open_0930": 5637.0,
-    "gap": 16.75,
+    "gap": 13.75,
     "half_gap_filled": true,
-    "full_gap_filled": true
+    "full_gap_filled": false
   },
   {
     "date": "2025-03-20",
-    "prev_close": 5680.75,
+    "prev_close": 5683.25,
     "open_0930": 5641.25,
-    "gap": -39.5,
+    "gap": -42.0,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-03-24",
-    "prev_close": 5668.0,
+    "prev_close": 5666.75,
     "open_0930": 5782.5,
-    "gap": 114.5,
+    "gap": 115.75,
     "half_gap_filled": false,
     "full_gap_filled": false
   },
   {
     "date": "2025-03-25",
-    "prev_close": 5816.5,
+    "prev_close": 5817.0,
     "open_0930": 5826.0,
-    "gap": 9.5,
+    "gap": 9.0,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-03-26",
-    "prev_close": 5830.75,
+    "prev_close": 5828.75,
     "open_0930": 5824.0,
-    "gap": -6.75,
+    "gap": -4.75,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-03-27",
-    "prev_close": 5754.25,
+    "prev_close": 5758.25,
     "open_0930": 5742.75,
-    "gap": -11.5,
+    "gap": -15.5,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-03-28",
-    "prev_close": 5743.25,
+    "prev_close": 5743.0,
     "open_0930": 5723.5,
-    "gap": -19.75,
-    "half_gap_filled": true,
-    "full_gap_filled": true
+    "gap": -19.5,
+    "half_gap_filled": false,
+    "full_gap_filled": false
   },
   {
     "date": "2025-03-31",
-    "prev_close": 5608.0,
+    "prev_close": 5614.0,
     "open_0930": 5563.5,
-    "gap": -44.5,
+    "gap": -50.5,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-01",
-    "prev_close": 5645.75,
+    "prev_close": 5645.5,
     "open_0930": 5638.75,
-    "gap": -7.0,
+    "gap": -6.75,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-02",
-    "prev_close": 5668.75,
+    "prev_close": 5674.5,
     "open_0930": 5613.0,
-    "gap": -55.75,
+    "gap": -61.5,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-03",
-    "prev_close": 5627.75,
+    "prev_close": 5753.0,
     "open_0930": 5512.0,
-    "gap": -115.75,
+    "gap": -241.0,
     "half_gap_filled": false,
     "full_gap_filled": false
   },
   {
     "date": "2025-04-04",
-    "prev_close": 5415.75,
+    "prev_close": 5434.0,
     "open_0930": 5292.0,
-    "gap": -123.75,
-    "half_gap_filled": true,
-    "full_gap_filled": true
+    "gap": -142.0,
+    "half_gap_filled": false,
+    "full_gap_filled": false
   },
   {
     "date": "2025-04-07",
-    "prev_close": 5083.0,
+    "prev_close": 5105.25,
     "open_0930": 4942.5,
-    "gap": -140.5,
+    "gap": -162.75,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-08",
-    "prev_close": 5124.25,
+    "prev_close": 5128.75,
     "open_0930": 5272.0,
-    "gap": 147.75,
+    "gap": 143.25,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-09",
-    "prev_close": 4996.75,
+    "prev_close": 5013.0,
     "open_0930": 4983.0,
-    "gap": -13.75,
+    "gap": -30.0,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-10",
-    "prev_close": 5504.5,
+    "prev_close": 5483.75,
     "open_0930": 5375.5,
-    "gap": -129.0,
-    "half_gap_filled": true,
+    "gap": -108.25,
+    "half_gap_filled": false,
     "full_gap_filled": false
   },
   {
     "date": "2025-04-11",
-    "prev_close": 5297.25,
+    "prev_close": 5319.25,
     "open_0930": 5281.0,
-    "gap": -16.25,
+    "gap": -38.25,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-14",
-    "prev_close": 5398.0,
+    "prev_close": 5397.25,
     "open_0930": 5493.0,
-    "gap": 95.0,
+    "gap": 95.75,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-15",
-    "prev_close": 5417.25,
+    "prev_close": 5437.75,
     "open_0930": 5449.75,
-    "gap": 32.5,
+    "gap": 12.0,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-16",
-    "prev_close": 5423.0,
+    "prev_close": 5428.25,
     "open_0930": 5367.25,
-    "gap": -55.75,
+    "gap": -61.0,
     "half_gap_filled": true,
-    "full_gap_filled": true
+    "full_gap_filled": false
   },
   {
     "date": "2025-04-17",
-    "prev_close": 5311.75,
+    "prev_close": 5315.5,
     "open_0930": 5322.5,
-    "gap": 10.75,
+    "gap": 7.0,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-21",
-    "prev_close": 5315.25,
+    "prev_close": 5326.0,
     "open_0930": 5257.0,
-    "gap": -58.25,
+    "gap": -69.0,
     "half_gap_filled": false,
     "full_gap_filled": false
   },
   {
     "date": "2025-04-22",
-    "prev_close": 5178.5,
+    "prev_close": 5180.25,
     "open_0930": 5245.5,
-    "gap": 67.0,
-    "half_gap_filled": true,
+    "gap": 65.25,
+    "half_gap_filled": false,
     "full_gap_filled": false
   },
   {
     "date": "2025-04-23",
-    "prev_close": 5317.5,
+    "prev_close": 5314.25,
     "open_0930": 5450.0,
-    "gap": 132.5,
-    "half_gap_filled": true,
+    "gap": 135.75,
+    "half_gap_filled": false,
     "full_gap_filled": false
   },
   {
     "date": "2025-04-24",
-    "prev_close": 5423.75,
+    "prev_close": 5400.75,
     "open_0930": 5411.75,
-    "gap": -12.0,
+    "gap": 11.0,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-25",
-    "prev_close": 5519.5,
+    "prev_close": 5521.75,
     "open_0930": 5510.5,
-    "gap": -9.0,
+    "gap": -11.25,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-28",
-    "prev_close": 5552.0,
+    "prev_close": 5553.75,
     "open_0930": 5556.75,
-    "gap": 4.75,
+    "gap": 3.0,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-29",
-    "prev_close": 5544.5,
+    "prev_close": 5544.75,
     "open_0930": 5531.0,
-    "gap": -13.5,
+    "gap": -13.75,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-04-30",
-    "prev_close": 5584.75,
+    "prev_close": 5586.0,
     "open_0930": 5516.5,
-    "gap": -68.25,
+    "gap": -69.5,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-05-01",
-    "prev_close": 5621.0,
+    "prev_close": 5605.75,
     "open_0930": 5645.0,
-    "gap": 24.0,
+    "gap": 39.25,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-05-02",
-    "prev_close": 5618.5,
+    "prev_close": 5609.25,
     "open_0930": 5686.75,
-    "gap": 68.25,
-    "half_gap_filled": true,
+    "gap": 77.5,
+    "half_gap_filled": false,
     "full_gap_filled": false
   },
   {
     "date": "2025-05-05",
-    "prev_close": 5709.5,
+    "prev_close": 5711.5,
     "open_0930": 5664.25,
-    "gap": -45.25,
+    "gap": -47.25,
     "half_gap_filled": true,
     "full_gap_filled": false
   },
   {
     "date": "2025-05-06",
-    "prev_close": 5666.75,
+    "prev_close": 5668.5,
     "open_0930": 5616.5,
-    "gap": -50.25,
+    "gap": -52.0,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-05-07",
-    "prev_close": 5606.75,
+    "prev_close": 5624.5,
     "open_0930": 5638.5,
-    "gap": 31.75,
+    "gap": 14.0,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-05-08",
-    "prev_close": 5644.75,
+    "prev_close": 5651.25,
     "open_0930": 5688.75,
-    "gap": 44.0,
+    "gap": 37.5,
     "half_gap_filled": true,
     "full_gap_filled": false
   },
   {
     "date": "2025-05-09",
-    "prev_close": 5685.5,
+    "prev_close": 5685.25,
     "open_0930": 5700.0,
-    "gap": 14.5,
+    "gap": 14.75,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-05-12",
-    "prev_close": 5677.5,
+    "prev_close": 5679.0,
     "open_0930": 5850.25,
-    "gap": 172.75,
-    "half_gap_filled": true,
+    "gap": 171.25,
+    "half_gap_filled": false,
     "full_gap_filled": false
   },
   {
     "date": "2025-05-13",
-    "prev_close": 5867.25,
+    "prev_close": 5864.0,
     "open_0930": 5869.75,
-    "gap": 2.5,
+    "gap": 5.75,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-05-14",
-    "prev_close": 5900.5,
+    "prev_close": 5902.75,
     "open_0930": 5913.25,
-    "gap": 12.75,
+    "gap": 10.5,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-05-15",
-    "prev_close": 5908.75,
+    "prev_close": 5910.25,
     "open_0930": 5889.0,
-    "gap": -19.75,
+    "gap": -21.25,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-05-16",
-    "prev_close": 5936.25,
+    "prev_close": 5937.25,
     "open_0930": 5944.5,
-    "gap": 8.25,
+    "gap": 7.25,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-05-19",
-    "prev_close": 5973.25,
+    "prev_close": 5972.75,
     "open_0930": 5912.25,
-    "gap": -61.0,
+    "gap": -60.5,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
   {
     "date": "2025-05-20",
-    "prev_close": 5975.25,
+    "prev_close": 5973.0,
     "open_0930": 5962.25,
-    "gap": -13.0,
+    "gap": -10.75,
     "half_gap_filled": true,
     "full_gap_filled": false
   },
   {
     "date": "2025-05-21",
-    "prev_close": 5957.5,
+    "prev_close": 5952.25,
     "open_0930": 5914.5,
-    "gap": -43.0,
+    "gap": -37.75,
     "half_gap_filled": true,
-    "full_gap_filled": false
+    "full_gap_filled": true
   },
   {
     "date": "2025-05-22",
-    "prev_close": 5856.0,
+    "prev_close": 5853.0,
     "open_0930": 5855.5,
-    "gap": -0.5,
+    "gap": 2.5,
     "half_gap_filled": true,
     "full_gap_filled": true
   }
