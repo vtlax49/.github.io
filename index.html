@@ -4,20 +4,20 @@
   <meta charset="UTF-8" />
   <title>ES RTH Gap-Fill Dashboard</title>
   <style>
-    body   { font-family: system-ui, sans-serif; margin: 2rem; max-width: 980px; }
-    h1,h2  { margin:.2rem 0 .6rem 0; }
-    table  { border-collapse: collapse; width: 100%; margin: 1.2rem 0; font-size: 0.95rem;}
-    th,td  { border: 1px solid #ccc; padding: 6px 8px; text-align: center; }
-    th     { background:#f3f3f3; }
-    caption{ margin-bottom:.4rem; font-weight:600; text-align:left; }
-    .error { color:red; }
+    body{font-family:system-ui,sans-serif;margin:2rem;max-width:980px}
+    h1,h2{margin:.2rem 0 .6rem}
+    table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.95rem}
+    th,td{border:1px solid #ccc;padding:6px 8px;text-align:center}
+    th{background:#f3f3f3}
+    caption{margin-bottom:.4rem;font-weight:600;text-align:left}
+    .error{color:red}
   </style>
 </head>
 <body>
 <h1>RTH Gap-Fill Statistics — ES Futures</h1>
 <p id="status">Loading data…</p>
 
-<!-- SUMMARY: overall vs last-30 trading days -->
+<!-- SUMMARY ---------------------------------------------------------------->
 <table id="tbl-summary" hidden>
   <caption>Overall vs Last 30 Trading Days <small>(zero-gap days excluded)</small></caption>
   <thead>
@@ -27,7 +27,7 @@
   <tbody></tbody>
 </table>
 
-<!-- WEEKDAY breakdown -->
+<!-- WEEKDAY ---------------------------------------------------------------->
 <table id="tbl-weekday" hidden>
   <caption>By Weekday (zero-gap days excluded)</caption>
   <thead>
@@ -37,75 +37,71 @@
   <tbody></tbody>
 </table>
 
-<!-- DAILY detail table -->
+<!-- DAILY DETAIL ----------------------------------------------------------->
 <table id="tbl-detail" hidden>
   <caption>Daily Gap-Fill Results (most-recent first)</caption>
   <thead>
     <tr>
-      <th>Date</th>
-      <th>Prev Close (16:00)</th>
-      <th>09 : 30 Open</th>
-      <th>Gap</th>
-      <th>½ Filled?</th>
-      <th>Full Filled?</th>
+      <th>Date</th><th>Prev Close (16:00)</th><th>09 : 30 Open</th>
+      <th>Gap</th><th>½ Filled?</th><th>Full Filled?</th>
     </tr>
   </thead>
   <tbody></tbody>
 </table>
 
 <script type="module">
-const pct = (n,d)=> d ? (100*n/d).toFixed(1)+'%' : '—';
+const pct=(n,d)=>d?(100*n/d).toFixed(1)+'%':'—';
 const wdNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-/* ----- helpers ---------------------------------------------------------- */
+function dayIndex(dateStr){
+  // 👉 NEW: use noon local time so timezone offset can’t push us to prior day
+  return new Date(dateStr+'T12:00').getDay();
+}
+
 function calcStats(set){
   const gaps=set.filter(r=>r.gap!==0);
-  const total=gaps.length;
   return {
-    total,
+    total:gaps.length,
     half:gaps.filter(r=>r.half_gap_filled).length,
     full:gaps.filter(r=>r.full_gap_filled).length
   };
 }
 
-/* ----- build tables ----------------------------------------------------- */
 function buildTables(rows){
   const last30=rows.slice(-30);
 
-  /* summary -------------------------------------------------------------- */
-  const sumBody=document.querySelector('#tbl-summary tbody');
+  /* summary */
+  const sBody=document.querySelector('#tbl-summary tbody');
   [{label:'Overall',set:rows},{label:'Last 30',set:last30}].forEach(({label,set})=>{
     const {total,half,full}=calcStats(set);
-    sumBody.insertAdjacentHTML('beforeend',`
-      <tr>
-        <td style="text-align:left">${label}</td>
-        <td>${half}</td><td>${pct(half,total)}</td>
-        <td>${full}</td><td>${pct(full,total)}</td>
-      </tr>`);
+    sBody.insertAdjacentHTML('beforeend',`
+      <tr><td style="text-align:left">${label}</td>
+          <td>${half}</td><td>${pct(half,total)}</td>
+          <td>${full}</td><td>${pct(full,total)}</td></tr>`);
   });
   document.getElementById('tbl-summary').hidden=false;
 
-  /* weekday -------------------------------------------------------------- */
-  const wdBody=document.querySelector('#tbl-weekday tbody');
+  /* weekday */
+  const wBody=document.querySelector('#tbl-weekday tbody');
   ['Mon','Tue','Wed','Thu','Fri'].forEach(wd=>{
     const idx=wdNames.indexOf(wd);
-    const all=rows .filter(r=>new Date(r.date).getDay()===idx);
-    const d30=last30.filter(r=>new Date(r.date).getDay()===idx);
+    const all=rows .filter(r=>dayIndex(r.date)===idx);
+    const d30=last30.filter(r=>dayIndex(r.date)===idx);
+
     const {total:ta,half:ha,full:fa}=calcStats(all);
     const {total:tb,half:hb,full:fb}=calcStats(d30);
-    wdBody.insertAdjacentHTML('beforeend',`
-      <tr>
-        <td style="text-align:left">${wd}</td>
-        <td>${pct(ha,ta)}</td><td>${pct(hb,tb)}</td>
-        <td>${pct(fa,ta)}</td><td>${pct(fb,tb)}</td>
-      </tr>`);
+
+    wBody.insertAdjacentHTML('beforeend',`
+      <tr><td style="text-align:left">${wd}</td>
+          <td>${pct(ha,ta)}</td><td>${pct(hb,tb)}</td>
+          <td>${pct(fa,ta)}</td><td>${pct(fb,tb)}</td></tr>`);
   });
   document.getElementById('tbl-weekday').hidden=false;
 
-  /* daily detail --------------------------------------------------------- */
-  const detBody=document.querySelector('#tbl-detail tbody');
+  /* daily detail */
+  const dBody=document.querySelector('#tbl-detail tbody');
   rows.slice().reverse().forEach(r=>{
-    detBody.insertAdjacentHTML('beforeend',`
+    dBody.insertAdjacentHTML('beforeend',`
       <tr>
         <td style="text-align:left">${r.date}</td>
         <td>${r.prev_close.toFixed(2)}</td>
@@ -118,18 +114,17 @@ function buildTables(rows){
   document.getElementById('tbl-detail').hidden=false;
 }
 
-/* ----- fetch + render --------------------------------------------------- */
+/* fetch + render */
 (async()=>{
   try{
     const res=await fetch('./es_gapfills.json');
     if(!res.ok) throw new Error(res.status+' '+res.statusText);
-    const data=await res.json();
-    buildTables(data);
+    buildTables(await res.json());
     document.getElementById('status').hidden=true;
   }catch(err){
-    const st=document.getElementById('status');
-    st.textContent='⚠️ '+err.message+' — is es_gapfills.json present?';
-    st.className='error';
+    const s=document.getElementById('status');
+    s.textContent='⚠️ '+err.message+' — is es_gapfills.json present?';
+    s.className='error';
     console.error(err);
   }
 })();
