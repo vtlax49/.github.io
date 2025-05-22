@@ -1,13 +1,5 @@
 [
   {
-    "date": "2025-03-13",
-    "prev_close": 5603.0,
-    "open_0930": 5597.75,
-    "gap": -5.25,
-    "half_gap_filled": true,
-    "full_gap_filled": true
-  },
-  {
     "date": "2025-03-14",
     "prev_close": 5528.25,
     "open_0930": 5572.0,
@@ -337,9 +329,9 @@
   },
   {
     "date": "2025-05-14",
-    "prev_close": 5909.25,
+    "prev_close": 5903.5,
     "open_0930": 5913.25,
-    "gap": 4.0,
+    "gap": 9.75,
     "half_gap_filled": true,
     "full_gap_filled": true
   },
