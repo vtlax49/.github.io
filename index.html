@@ -1,30 +1,75 @@
-<h2>ES futures – 30 min candles (last 60 days)</h2>
-<table id="es"></table>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ES Futures Dashboard</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 2rem; }
+    th, td { border: 1px solid #ccc; padding: 4px 6px; }
+    th { background: #f4f4f4; text-align: left; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+
+<h1>ES futures – 30-minute candles (last 60 days)</h1>
+<p id="es-status">Loading…</p>
+<table id="es" hidden></table>
+
+<h2>RTH Gap &amp; Fill Stats</h2>
+<p id="gap-status">Loading…</p>
+<table id="gap" hidden></table>
 
 <script type="module">
-async function loadES() {
-  const res  = await fetch('es_30m.json');
-  const data = await res.json();
+async function renderTable(url, tableId, statusId, makeRow) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+    const data = await res.json();
 
-  // Build header
-  const tbl = document.getElementById('es');
-  tbl.innerHTML =
-    '<tr><th>Date & Time</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Vol</th></tr>';
+    const tbl = document.getElementById(tableId);
+    const status = document.getElementById(statusId);
+    status.hidden = true;
+    tbl.hidden = false;
 
-  // Show ALL rows – or slice(-n) for fewer
-  data.forEach(d => {
-    tbl.insertAdjacentHTML('beforeend', `
-      <tr>
-        <td>${d.datetime.replace('T',' ').slice(0,16)}</td>
-        <td>${d.open }</td>
-        <td>${d.high }</td>
-        <td>${d.low  }</td>
-        <td>${d.close}</td>
-        <td>${d.volume.toLocaleString()}</td>
-      </tr>
-    `);
-  });
+    data.forEach(d => tbl.insertAdjacentHTML('beforeend', makeRow(d)));
+  } catch (err) {
+    document.getElementById(statusId).textContent =
+      '⚠️ ' + err.message + ' — is the JSON file present?';
+    document.getElementById(statusId).className = 'error';
+    console.error(err);
+  }
 }
 
-loadES();
+// 30-minute candles ----------------------------------------------------------
+document.getElementById('es').innerHTML =
+  '<tr><th>Date&nbsp;Time</th><th>Open</th><th>High</th>' +
+  '<th>Low</th><th>Close</th><th>Vol</th></tr>';
+
+renderTable('./es_30m.json', 'es', 'es-status', d => `
+  <tr>
+    <td>${d.datetime.replace('T',' ').slice(0,16)}</td>
+    <td>${d.open}</td><td>${d.high}</td><td>${d.low}</td>
+    <td>${d.close}</td><td>${d.volume.toLocaleString()}</td>
+  </tr>
+`);
+
+// Gap-fill stats -------------------------------------------------------------
+document.getElementById('gap').innerHTML =
+  '<tr><th>Date</th><th>Prev&nbsp;Close</th><th>09:30&nbsp;Open</th>' +
+  '<th>Gap</th><th>½&nbsp;filled?</th><th>Full&nbsp;filled?</th></tr>';
+
+renderTable('./es_gapfills.json', 'gap', 'gap-status', d => `
+  <tr>
+    <td>${d.date}</td><td>${d.prev_close}</td><td>${d.open_0930}</td>
+    <td>${d.gap}</td>
+    <td>${d.half_gap_filled ? '✅' : '❌'}</td>
+    <td>${d.full_gap_filled ? '✅' : '❌'}</td>
+  </tr>
+`);
 </script>
+
+<noscript><p class="error">This page needs JavaScript to display data.</p></noscript>
+</body>
+</html>
