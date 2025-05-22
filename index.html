@@ -9,40 +9,65 @@
     th, td { border: 1px solid #ccc; padding: 4px 6px; }
     th { background: #f4f4f4; text-align: left; }
     .error { color: red; }
+    .right { text-align: right; }
+    .gap-panel h2 { margin-top: 0; }
+    .gap-panel { border: 1px solid #ccc; padding: 1rem; margin-bottom: 2rem; }
+    .gap-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: 6px; }
+    .gap-grid div { background:#f9f9f9; padding:4px; border-radius:4px; }
+    .gap-grid .hdr { font-weight:600; background:#eaeaea; }
   </style>
 </head>
 <body>
 
+<!-- ───────── 30-min candle table ─────────────────────────────────────────── -->
 <h1>ES futures – 30-minute candles (last 60 days)</h1>
 <p id="es-status">Loading…</p>
 <table id="es" hidden></table>
 
-<h2>RTH Gap &amp; Fill Stats</h2>
-<p id="gap-status">Loading…</p>
+<!-- ───────── Gap-fill SUMMARY panel ──────────────────────────────────────── -->
+<div class="gap-panel">
+  <h2>RTH Gap & Fill Stats</h2>
+  <p id="gap-sum-status">Calculating…</p>
+  <div id="gap-sum" class="gap-grid" hidden></div>
+</div>
+
+<!-- ───────── Gap-fill DETAIL table ───────────────────────────────────────── -->
 <table id="gap" hidden></table>
 
 <script type="module">
-async function renderTable(url, tableId, statusId, makeRow) {
+/* ---------- helper utilities -------------------------------------------- */
+const pct = (num, den) => den ? (100 * num / den).toFixed(1) + '%' : '—';
+
+function weekdayStr(d) {
+  return ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][new Date(d).getDay()];
+}
+
+/* ---------- generic table loader (unchanged) ----------------------------- */
+async function renderTable(url, tableId, statusId, makeRow, afterLoad=undefined) {
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
     const data = await res.json();
 
     const tbl = document.getElementById(tableId);
-    const status = document.getElementById(statusId);
-    status.hidden = true;
-    tbl.hidden = false;
+    if (tbl) {
+      tbl.hidden = false;
+      tbl.innerHTML += data.map(makeRow).join('');
+    }
 
-    data.forEach(d => tbl.insertAdjacentHTML('beforeend', makeRow(d)));
+    const stat = document.getElementById(statusId);
+    if (stat) stat.hidden = true;
+
+    if (afterLoad) afterLoad(data);
   } catch (err) {
-    document.getElementById(statusId).textContent =
-      '⚠️ ' + err.message + ' — is the JSON file present?';
-    document.getElementById(statusId).className = 'error';
+    const el = document.getElementById(statusId);
+    el.textContent = '⚠️ ' + err.message + ' — is the JSON file present?';
+    el.className = 'error';
     console.error(err);
   }
 }
 
-// 30-minute candles ----------------------------------------------------------
+/* ---------- 30-minute candle table -------------------------------------- */
 document.getElementById('es').innerHTML =
   '<tr><th>Date&nbsp;Time</th><th>Open</th><th>High</th>' +
   '<th>Low</th><th>Close</th><th>Vol</th></tr>';
@@ -51,23 +76,54 @@ renderTable('./es_30m.json', 'es', 'es-status', d => `
   <tr>
     <td>${d.datetime.replace('T',' ').slice(0,16)}</td>
     <td>${d.open}</td><td>${d.high}</td><td>${d.low}</td>
-    <td>${d.close}</td><td>${d.volume.toLocaleString()}</td>
+    <td>${d.close}</td><td class="right">${d.volume.toLocaleString()}</td>
   </tr>
 `);
 
-// Gap-fill stats -------------------------------------------------------------
+/* ---------- Gap-fill detail table --------------------------------------- */
 document.getElementById('gap').innerHTML =
   '<tr><th>Date</th><th>Prev&nbsp;Close</th><th>09:30&nbsp;Open</th>' +
   '<th>Gap</th><th>½&nbsp;filled?</th><th>Full&nbsp;filled?</th></tr>';
 
-renderTable('./es_gapfills.json', 'gap', 'gap-status', d => `
+/* ---------- Gap-fill SUMMARY logic -------------------------------------- */
+function buildGapSummary(data) {
+  const sumDiv = document.getElementById('gap-sum');
+  const last30  = data.slice(-30);
+
+  const metrics = [
+    { label:'Overall',      set:data },
+    { label:'Last&nbsp;30&nbsp;days', set:last30 }
+  ];
+
+  // weekday buckets (Mon-Fri)
+  ['Mon','Tue','Wed','Thu','Fri'].forEach(wd => {
+    metrics.push({ label:`${wd} (all)`, set:data.filter(d=>weekdayStr(d.date)===wd) });
+    metrics.push({ label:`${wd} (30d)`, set:last30.filter(d=>weekdayStr(d.date)===wd) });
+  });
+
+  const boxes = metrics.map(({label,set})=>{
+    const total = set.length;
+    const half  = set.filter(x=>x.half_gap_filled).length;
+    const full  = set.filter(x=>x.full_gap_filled).length;
+    return `
+      <div class="hdr">${label}</div>
+      <div>½&nbsp;fill: ${pct(half,total)}</div>
+      <div>Full&nbsp;fill: ${pct(full,total)}</div>
+    `;
+  }).join('');
+
+  sumDiv.innerHTML = boxes;
+  sumDiv.hidden = false;
+}
+
+renderTable('./es_gapfills.json','gap','gap-sum-status', d => `
   <tr>
     <td>${d.date}</td><td>${d.prev_close}</td><td>${d.open_0930}</td>
     <td>${d.gap}</td>
     <td>${d.half_gap_filled ? '✅' : '❌'}</td>
     <td>${d.full_gap_filled ? '✅' : '❌'}</td>
   </tr>
-`);
+`, buildGapSummary);
 </script>
 
 <noscript><p class="error">This page needs JavaScript to display data.</p></noscript>
