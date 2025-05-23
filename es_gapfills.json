@@ -380,7 +380,7 @@
     "prev_close": 5859.0,
     "open_0930": 5784.0,
     "gap": -75.0,
-    "half_gap_filled": false,
+    "half_gap_filled": true,
     "full_gap_filled": false
   }
 ]
