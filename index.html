@@ -1,135 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <title>ES RTH Gap-Fill Dashboard</title>
+
+  <!-- Tailwind CSS – just a CDN link, no build step -->
+  <script src="https://cdn.tailwindcss.com/3.4.4"></script>
+
+  <!-- Fav icon & meta ----------------------------------------------------->
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22
+        viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
+
+  <!-- Custom tweaks ------------------------------------------------------->
   <style>
-    body{font-family:system-ui,sans-serif;margin:2rem;max-width:980px}
-    h1,h2{margin:.2rem 0 .6rem}
-    table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.95rem}
-    th,td{border:1px solid #ccc;padding:6px 8px;text-align:center}
-    th{background:#f3f3f3}
-    caption{margin-bottom:.4rem;font-weight:600;text-align:left}
-    .error{color:red}
+    body{
+      @apply bg-gradient-to-tr from-indigo-700 via-blue-700 to-sky-600
+             text-white min-h-screen antialiased;
+    }
+    /* glass card */
+    .glass{
+      @apply bg-white/10 backdrop-blur-sm rounded-2xl shadow-md p-6
+             ring-1 ring-white/20;
+    }
+    table{
+      @apply w-full text-sm sm:text-base;
+    }
+    th{
+      @apply px-3 py-2 border-b border-white/20 bg-white/10 uppercase tracking-wide;
+    }
+    td{
+      @apply px-3 py-1 border-b border-white/10 text-center;
+    }
+    tr:hover td{ @apply bg-white/5 transition; }
+    .badge{ @apply inline-block min-w-[3rem] rounded-full px-2 py-0.5;
+            font-variant-numeric: tabular-nums; }
+    .ok   { @apply badge bg-emerald-500/90 }
+    .fail { @apply badge bg-rose-500/90  }
   </style>
 </head>
-<body>
-<h1>RTH Gap-Fill Statistics — ES Futures</h1>
-<p id="status">Loading data…</p>
 
-<!-- SUMMARY ---------------------------------------------------------------->
-<table id="tbl-summary" hidden>
-  <caption>Overall vs Last 30 Trading Days <small>(zero-gap days excluded)</small></caption>
-  <thead>
-    <tr><th rowspan="2"></th><th colspan="2">Half-Gap Fill</th><th colspan="2">Full-Gap Fill</th></tr>
-    <tr><th>Count</th><th>%</th><th>Count</th><th>%</th></tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<body class="flex flex-col items-center px-4 sm:px-6">
 
-<!-- WEEKDAY ---------------------------------------------------------------->
-<table id="tbl-weekday" hidden>
-  <caption>By Weekday (zero-gap days excluded)</caption>
-  <thead>
-    <tr><th rowspan="2">Week-day</th><th colspan="2">Half-Gap Fill %</th><th colspan="2">Full-Gap Fill %</th></tr>
-    <tr><th>All</th><th>30d</th><th>All</th><th>30d</th></tr>
-  </thead>
-  <tbody></tbody>
-</table>
+  <header class="max-w-3xl w-full mt-8 mb-6 text-center glass">
+    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">ES Futures – RTH Gap Fill Stats</h1>
+    <p class="mt-1 text-sm sm:text-base text-white/80">
+      Updated automatically with 15-minute data from yfinance
+    </p>
+  </header>
 
-<!-- DAILY DETAIL ----------------------------------------------------------->
-<table id="tbl-detail" hidden>
-  <caption>Daily Gap-Fill Results (most-recent first)</caption>
-  <thead>
-    <tr>
-      <th>Date</th><th>Prev Close (16:00)</th><th>09 : 30 Open</th>
-      <th>Gap</th><th>½ Filled?</th><th>Full Filled?</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+  <!-- STATUS message -->
+  <p id="status" class="glass w-full max-w-3xl text-center mb-6">Loading data…</p>
 
+  <!-- SUMMARY ------------------------------------------------------------->
+  <section id="card-summary" class="glass w-full max-w-3xl mb-6 hidden">
+    <h2 class="text-xl font-semibold mb-3">Overall vs Last 30 Trading Days</h2>
+    <div class="overflow-x-auto">
+      <table id="tbl-summary"></table>
+    </div>
+  </section>
+
+  <!-- WEEKDAY ------------------------------------------------------------->
+  <section id="card-wd" class="glass w-full max-w-3xl mb-6 hidden">
+    <h2 class="text-xl font-semibold mb-3">Weekday Breakdown</h2>
+    <div class="overflow-x-auto">
+      <table id="tbl-weekday"></table>
+    </div>
+  </section>
+
+  <!-- DAILY DETAIL -------------------------------------------------------->
+  <section id="card-detail" class="glass w-full max-w-5xl mb-12 hidden">
+    <h2 class="text-xl font-semibold mb-3">Daily Results (latest first)</h2>
+    <div class="overflow-x-auto">
+      <table id="tbl-detail" class="text-sm"></table>
+    </div>
+  </section>
+
+<!-- ===================================================================== -->
 <script type="module">
-const pct=(n,d)=>d?(100*n/d).toFixed(1)+'%':'—';
-const wdNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const pct = (n,d)=>d?(100*n/d).toFixed(1)+'%':'—';
+const wd = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-function dayIndex(dateStr){
-  // 👉 NEW: use noon local time so timezone offset can’t push us to prior day
-  return new Date(dateStr+'T12:00').getDay();
+function dayIdx(str){ return new Date(str+'T12:00').getDay(); }
+
+function calc(set){
+  const gaps = set.filter(r=>r.gap!==0);
+  const t = gaps.length;
+  return {t, h:gaps.filter(x=>x.half_gap_filled).length,
+              f:gaps.filter(x=>x.full_gap_filled).length};
 }
 
-function calcStats(set){
-  const gaps=set.filter(r=>r.gap!==0);
-  return {
-    total:gaps.length,
-    half:gaps.filter(r=>r.half_gap_filled).length,
-    full:gaps.filter(r=>r.full_gap_filled).length
-  };
-}
-
-function buildTables(rows){
+/* ---------------- build html helpers ---------------------------------- */
+function buildSummary(rows){
   const last30=rows.slice(-30);
-
-  /* summary */
-  const sBody=document.querySelector('#tbl-summary tbody');
-  [{label:'Overall',set:rows},{label:'Last 30',set:last30}].forEach(({label,set})=>{
-    const {total,half,full}=calcStats(set);
-    sBody.insertAdjacentHTML('beforeend',`
-      <tr><td style="text-align:left">${label}</td>
-          <td>${half}</td><td>${pct(half,total)}</td>
-          <td>${full}</td><td>${pct(full,total)}</td></tr>`);
-  });
-  document.getElementById('tbl-summary').hidden=false;
-
-  /* weekday */
-  const wBody=document.querySelector('#tbl-weekday tbody');
-  ['Mon','Tue','Wed','Thu','Fri'].forEach(wd=>{
-    const idx=wdNames.indexOf(wd);
-    const all=rows .filter(r=>dayIndex(r.date)===idx);
-    const d30=last30.filter(r=>dayIndex(r.date)===idx);
-
-    const {total:ta,half:ha,full:fa}=calcStats(all);
-    const {total:tb,half:hb,full:fb}=calcStats(d30);
-
-    wBody.insertAdjacentHTML('beforeend',`
-      <tr><td style="text-align:left">${wd}</td>
-          <td>${pct(ha,ta)}</td><td>${pct(hb,tb)}</td>
-          <td>${pct(fa,ta)}</td><td>${pct(fb,tb)}</td></tr>`);
-  });
-  document.getElementById('tbl-weekday').hidden=false;
-
-  /* daily detail */
-  const dBody=document.querySelector('#tbl-detail tbody');
-  rows.slice().reverse().forEach(r=>{
-    dBody.insertAdjacentHTML('beforeend',`
-      <tr>
-        <td style="text-align:left">${r.date}</td>
-        <td>${r.prev_close.toFixed(2)}</td>
-        <td>${r.open_0930.toFixed(2)}</td>
-        <td>${r.gap.toFixed(2)}</td>
-        <td>${r.half_gap_filled?'✅':'❌'}</td>
-        <td>${r.full_gap_filled?'✅':'❌'}</td>
-      </tr>`);
-  });
-  document.getElementById('tbl-detail').hidden=false;
+  const parts=[['Overall',rows],['Last 30',last30]];
+  const head=`
+    <thead><tr><th></th><th colspan="2">Half Fill</th><th colspan="2">Full Fill</th></tr>
+           <tr><th></th><th>Count</th><th>%</th><th>Count</th><th>%</th></tr></thead>`;
+  const body=parts.map(([lbl,set])=>{
+    const {t,h,f}=calc(set);
+    return `<tr><td class="text-left">${lbl}</td>
+      <td>${h}</td><td>${pct(h,t)}</td><td>${f}</td><td>${pct(f,t)}</td></tr>`;
+  }).join('');
+  document.getElementById('tbl-summary').innerHTML=head+'<tbody>'+body+'</tbody>';
+  document.getElementById('card-summary').classList.remove('hidden');
 }
 
-/* fetch + render */
+function buildWeekday(rows){
+  const last30=rows.slice(-30);
+  const head=`<thead>
+    <tr><th rowspan="2">Week-day</th><th colspan="2">Half Fill %</th><th colspan="2">Full Fill %</th></tr>
+    <tr><th>All</th><th>30d</th><th>All</th><th>30d</th></tr></thead>`;
+  const body=['Mon','Tue','Wed','Thu','Fri'].map(w=>{
+    const idx = wd.indexOf(w);
+    const a=rows .filter(r=>dayIdx(r.date)===idx);
+    const b=last30.filter(r=>dayIdx(r.date)===idx);
+    const {t:ta,h:ha,f:fa}=calc(a);
+    const {t:tb,h:hb,f:fb}=calc(b);
+    return `<tr><td class="text-left">${w}</td>
+      <td>${pct(ha,ta)}</td><td>${pct(hb,tb)}</td>
+      <td>${pct(fa,ta)}</td><td>${pct(fb,tb)}</td></tr>`;
+  }).join('');
+  document.getElementById('tbl-weekday').innerHTML=head+'<tbody>'+body+'</tbody>';
+  document.getElementById('card-wd').classList.remove('hidden');
+}
+
+function buildDaily(rows){
+  const head=`<thead>
+    <tr><th>Date</th><th>Prev Close</th><th>09:30 Open</th><th>Gap</th>
+        <th>½ Filled?</th><th>Full Filled?</th></tr></thead>`;
+  const body=rows.slice().reverse().map(r=>`
+    <tr>
+      <td class="text-left">${r.date}</td>
+      <td>${r.prev_close.toFixed(2)}</td>
+      <td>${r.open_0930.toFixed(2)}</td>
+      <td>${r.gap.toFixed(2)}</td>
+      <td>${r.half_gap_filled?'<span class="ok">✅</span>':'<span class="fail">✖</span>'}</td>
+      <td>${r.full_gap_filled?'<span class="ok">✅</span>':'<span class="fail">✖</span>'}</td>
+    </tr>`).join('');
+  document.getElementById('tbl-detail').innerHTML=head+'<tbody>'+body+'</tbody>';
+  document.getElementById('card-detail').classList.remove('hidden');
+}
+
+/* ---------------- fetch + render -------------------------------------- */
 (async()=>{
   try{
     const res=await fetch('./es_gapfills.json');
-    if(!res.ok) throw new Error(res.status+' '+res.statusText);
-    buildTables(await res.json());
-    document.getElementById('status').hidden=true;
+    if(!res.ok) throw new Error(res.status);
+    const data=await res.json();
+    buildSummary(data);
+    buildWeekday(data);
+    buildDaily(data);
+    document.getElementById('status').remove();
   }catch(err){
     const s=document.getElementById('status');
-    s.textContent='⚠️ '+err.message+' — is es_gapfills.json present?';
-    s.className='error';
-    console.error(err);
+    s.textContent='⚠️  '+err+' — es_gapfills.json missing?';
+    s.classList.add('text-red-200');
   }
 })();
 </script>
-
-<noscript><p class="error">This page needs JavaScript to display data.</p></noscript>
+<noscript><p class="text-red-200">Enable JavaScript to view the dashboard.</p></noscript>
 </body>
 </html>
