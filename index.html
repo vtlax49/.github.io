@@ -1,140 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>ES RTH Gap-Fill Dashboard</title>
+<meta charset="utf-8">
+<title>ES Futures  •  RTH Gap-Fill Dashboard</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <!-- Tailwind CSS – just a CDN link, no build step -->
-  <script src="https://cdn.tailwindcss.com/3.4.4"></script>
+<!-- Google Font + Tailwind (CDN, no build) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.4"></script>
+<script>tailwind.config = {theme:{extend:{fontFamily:{sans:["Inter",..."sans-serif"]}}}}</script>
 
-  <!-- Fav icon & meta ----------------------------------------------------->
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22
-        viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
-
-  <!-- Custom tweaks ------------------------------------------------------->
-  <style>
-    body{
-      @apply bg-gradient-to-tr from-indigo-700 via-blue-700 to-sky-600
-             text-white min-h-screen antialiased;
-    }
-    /* glass card */
-    .glass{
-      @apply bg-white/10 backdrop-blur-sm rounded-2xl shadow-md p-6
-             ring-1 ring-white/20;
-    }
-    table{
-      @apply w-full text-sm sm:text-base;
-    }
-    th{
-      @apply px-3 py-2 border-b border-white/20 bg-white/10 uppercase tracking-wide;
-    }
-    td{
-      @apply px-3 py-1 border-b border-white/10 text-center;
-    }
-    tr:hover td{ @apply bg-white/5 transition; }
-    .badge{ @apply inline-block min-w-[3rem] rounded-full px-2 py-0.5;
-            font-variant-numeric: tabular-nums; }
-    .ok   { @apply badge bg-emerald-500/90 }
-    .fail { @apply badge bg-rose-500/90  }
-  </style>
+<!-- Aurora background & glass helpers -->
+<style>
+body{
+  @apply min-h-screen bg-gradient-to-tr from-indigo-800 via-sky-800 to-fuchsia-700 text-slate-200 font-sans relative overflow-x-hidden;
+}
+.bg-blob{
+  @apply absolute rounded-full opacity-30 mix-blend-screen blur-3xl pointer-events-none;
+  animation: float 14s ease-in-out infinite alternate;
+}
+@keyframes float{to{transform:translateX(40vw) translateY(-20vh)}}
+.glass{
+  @apply backdrop-blur-sm bg-white/10 ring-1 ring-white/20 shadow-xl shadow-black/20 rounded-3xl;
+}
+.stat{
+  @apply text-center px-4 py-6 glass hover:bg-white/20 transition;
+}
+.stat h3{ @apply text-4xl font-semibold text-white drop-shadow-sm; }
+.stat p { @apply mt-1 text-sm uppercase tracking-wider text-white/70; }
+th{ @apply bg-white/5 text-sm uppercase tracking-wider font-medium; }
+td{ @apply text-sm text-center; }
+tr:hover td{ @apply bg-white/5 transition; }
+.badge{ @apply inline-block min-w-[2.5rem] rounded-full text-xs font-medium px-2.5 py-0.5}
+.ok   { @apply badge bg-emerald-500/90}
+.fail { @apply badge bg-rose-500/90 }
+</style>
 </head>
 
-<body class="flex flex-col items-center px-4 sm:px-6">
+<body>
 
-  <header class="max-w-3xl w-full mt-8 mb-6 text-center glass">
-    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">ES Futures – RTH Gap Fill Stats</h1>
-    <p class="mt-1 text-sm sm:text-base text-white/80">
-      Updated automatically with 15-minute data from yfinance
-    </p>
-  </header>
+<!-- Decorative blobs -->
+<div class="bg-blob w-[60vw] h-[60vw] bg-rose-400 left-[-20vw] top-[10vh]"></div>
+<div class="bg-blob w-[50vw] h-[50vw] bg-cyan-400 right-[-15vw] top-[40vh]"></div>
+<div class="bg-blob w-[45vw] h-[45vw] bg-violet-500 left-[30vw] bottom-[-20vh]"></div>
 
-  <!-- STATUS message -->
-  <p id="status" class="glass w-full max-w-3xl text-center mb-6">Loading data…</p>
+<!-- Frosted header -->
+<header class="glass sticky top-4 mx-auto w-[95%] max-w-5xl flex items-center justify-between px-6 py-3 backdrop-blur-md">
+  <h1 class="text-lg sm:text-xl font-semibold tracking-tight text-white">
+    ES Futures  •  RTH Gap-Fill Dashboard
+  </h1>
+  <span id="last-updated" class="text-xs text-white/70"></span>
+</header>
 
-  <!-- SUMMARY ------------------------------------------------------------->
-  <section id="card-summary" class="glass w-full max-w-3xl mb-6 hidden">
-    <h2 class="text-xl font-semibold mb-3">Overall vs Last 30 Trading Days</h2>
+<main class="mx-auto w-[95%] max-w-5xl space-y-10 pt-[5.5rem] pb-20">
+
+  <!-- Stats grid -->
+  <section id="stats" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"></section>
+
+  <!-- Weekday card -->
+  <section id="card-wd" class="glass p-6 hidden">
+    <h2 class="text-xl font-semibold mb-4">Weekday Breakdown</h2>
     <div class="overflow-x-auto">
-      <table id="tbl-summary"></table>
+      <table id="tbl-weekday" class="w-full table-fixed border-collapse"></table>
     </div>
   </section>
 
-  <!-- WEEKDAY ------------------------------------------------------------->
-  <section id="card-wd" class="glass w-full max-w-3xl mb-6 hidden">
-    <h2 class="text-xl font-semibold mb-3">Weekday Breakdown</h2>
-    <div class="overflow-x-auto">
-      <table id="tbl-weekday"></table>
+  <!-- Daily detail -->
+  <section id="card-detail" class="glass p-6 hidden">
+    <h2 class="text-xl font-semibold mb-4">Daily Results <span class="text-white/60 text-sm">(latest first)</span></h2>
+    <div class="overflow-x-auto max-h-[65vh]">
+      <table id="tbl-detail" class="w-full border-collapse"></table>
     </div>
   </section>
+</main>
 
-  <!-- DAILY DETAIL -------------------------------------------------------->
-  <section id="card-detail" class="glass w-full max-w-5xl mb-12 hidden">
-    <h2 class="text-xl font-semibold mb-3">Daily Results (latest first)</h2>
-    <div class="overflow-x-auto">
-      <table id="tbl-detail" class="text-sm"></table>
-    </div>
-  </section>
-
-<!-- ===================================================================== -->
+<!-- =======================  JS  ========================================= -->
 <script type="module">
-const pct = (n,d)=>d?(100*n/d).toFixed(1)+'%':'—';
-const wd = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const pct=(n,d)=>d?(100*n/d).toFixed(1)+'%':'—';
+const wd  =['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const idx =d=> new Date(d+'T12:00').getDay();
+function calc(set){const g=set.filter(x=>x.gap!==0),t=g.length;return{t,h:g.filter(x=>x.half_gap_filled).length,f:g.filter(x=>x.full_gap_filled).length}}
 
-function dayIdx(str){ return new Date(str+'T12:00').getDay(); }
+function statTile(title,value,foot){return`
+  <div class="stat" data-aos="fade-up">
+    <p class="text-sm mb-1 text-white/70">${title}</p>
+    <h3>${value}</h3>
+    ${foot?`<p class="mt-1 text-xs text-white/60">${foot}</p>`:''}
+  </div>`}
 
-function calc(set){
-  const gaps = set.filter(r=>r.gap!==0);
-  const t = gaps.length;
-  return {t, h:gaps.filter(x=>x.half_gap_filled).length,
-              f:gaps.filter(x=>x.full_gap_filled).length};
-}
-
-/* ---------------- build html helpers ---------------------------------- */
-function buildSummary(rows){
-  const last30=rows.slice(-30);
-  const parts=[['Overall',rows],['Last 30',last30]];
-  const head=`
-    <thead><tr><th></th><th colspan="2">Half Fill</th><th colspan="2">Full Fill</th></tr>
-           <tr><th></th><th>Count</th><th>%</th><th>Count</th><th>%</th></tr></thead>`;
-  const body=parts.map(([lbl,set])=>{
-    const {t,h,f}=calc(set);
-    return `<tr><td class="text-left">${lbl}</td>
-      <td>${h}</td><td>${pct(h,t)}</td><td>${f}</td><td>${pct(f,t)}</td></tr>`;
-  }).join('');
-  document.getElementById('tbl-summary').innerHTML=head+'<tbody>'+body+'</tbody>';
-  document.getElementById('card-summary').classList.remove('hidden');
+function buildStats(rows){
+  const {t,h,f}=calc(rows), last30=rows.slice(-30), x=calc(last30);
+  const grid=document.getElementById('stats');
+  grid.innerHTML=
+    statTile('Half Fill % – All', pct(h,t), `${h}/${t} days`) +
+    statTile('Full Fill % – All', pct(f,t), `${f}/${t} days`) +
+    statTile('Half Fill % – 30 d', pct(x.h,x.t), `${x.h}/${x.t}`) +
+    statTile('Full Fill % – 30 d', pct(x.f,x.t), `${x.f}/${x.t}`);
 }
 
 function buildWeekday(rows){
-  const last30=rows.slice(-30);
-  const head=`<thead>
-    <tr><th rowspan="2">Week-day</th><th colspan="2">Half Fill %</th><th colspan="2">Full Fill %</th></tr>
-    <tr><th>All</th><th>30d</th><th>All</th><th>30d</th></tr></thead>`;
+  const last=rows.slice(-30);
+  const head=`<thead><tr>
+      <th>Day</th><th>Half&nbsp;%</th><th>Half&nbsp;% <small class="opacity-70">(30d)</small></th>
+      <th>Full&nbsp;%</th><th>Full&nbsp;% <small class="opacity-70">(30d)</small></th></tr></thead>`;
   const body=['Mon','Tue','Wed','Thu','Fri'].map(w=>{
-    const idx = wd.indexOf(w);
-    const a=rows .filter(r=>dayIdx(r.date)===idx);
-    const b=last30.filter(r=>dayIdx(r.date)===idx);
-    const {t:ta,h:ha,f:fa}=calc(a);
-    const {t:tb,h:hb,f:fb}=calc(b);
-    return `<tr><td class="text-left">${w}</td>
-      <td>${pct(ha,ta)}</td><td>${pct(hb,tb)}</td>
-      <td>${pct(fa,ta)}</td><td>${pct(fb,tb)}</td></tr>`;
-  }).join('');
+    const a=rows.filter(r=>idx(r.date)===wd.indexOf(w)),
+          b=last.filter(r=>idx(r.date)===wd.indexOf(w));
+    const A=calc(a), B=calc(b);
+    return `<tr>
+      <td class="text-left">${w}</td>
+      <td>${pct(A.h,A.t)}</td><td>${pct(B.h,B.t)}</td>
+      <td>${pct(A.f,A.t)}</td><td>${pct(B.f,B.t)}</td>
+    </tr>`}).join('');
   document.getElementById('tbl-weekday').innerHTML=head+'<tbody>'+body+'</tbody>';
   document.getElementById('card-wd').classList.remove('hidden');
 }
 
 function buildDaily(rows){
-  const head=`<thead>
-    <tr><th>Date</th><th>Prev Close</th><th>09:30 Open</th><th>Gap</th>
-        <th>½ Filled?</th><th>Full Filled?</th></tr></thead>`;
+  const head=`<thead><tr>
+    <th class="w-[6.5rem] text-left">Date</th><th>Prev Close</th><th>09:30 Open</th><th>Gap</th>
+    <th>½ Fill</th><th>Full Fill</th></tr></thead>`;
   const body=rows.slice().reverse().map(r=>`
     <tr>
       <td class="text-left">${r.date}</td>
       <td>${r.prev_close.toFixed(2)}</td>
       <td>${r.open_0930.toFixed(2)}</td>
-      <td>${r.gap.toFixed(2)}</td>
+      <td class="${r.gap>0?'text-emerald-300':'text-rose-300'}">${r.gap.toFixed(2)}</td>
       <td>${r.half_gap_filled?'<span class="ok">✅</span>':'<span class="fail">✖</span>'}</td>
       <td>${r.full_gap_filled?'<span class="ok">✅</span>':'<span class="fail">✖</span>'}</td>
     </tr>`).join('');
@@ -142,23 +133,22 @@ function buildDaily(rows){
   document.getElementById('card-detail').classList.remove('hidden');
 }
 
-/* ---------------- fetch + render -------------------------------------- */
 (async()=>{
   try{
     const res=await fetch('./es_gapfills.json');
     if(!res.ok) throw new Error(res.status);
     const data=await res.json();
-    buildSummary(data);
+    buildStats(data);
     buildWeekday(data);
     buildDaily(data);
     document.getElementById('status').remove();
-  }catch(err){
-    const s=document.getElementById('status');
-    s.textContent='⚠️  '+err+' — es_gapfills.json missing?';
-    s.classList.add('text-red-200');
+    document.getElementById('last-updated').textContent =
+      'Updated '+new Date().toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});
+  }catch(e){
+    document.getElementById('status').textContent='⚠️ '+e+' (es_gapfills.json missing?)';
   }
 })();
 </script>
-<noscript><p class="text-red-200">Enable JavaScript to view the dashboard.</p></noscript>
+<noscript><p class="text-center text-red-200 my-6">Enable JavaScript to view the dashboard.</p></noscript>
 </body>
 </html>
